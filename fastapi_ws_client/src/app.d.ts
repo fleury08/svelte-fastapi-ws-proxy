@@ -2,15 +2,12 @@
 // for information about these interfaces
 
 import type { WebSocketMiddleman } from './websockets';
+import 'unplugin-icons/types/svelte';
 
 declare global {
 	namespace App {
 		// interface Error {}
-		interface Locals {
-			token: string;
-			session: string;
-			wsconnection: WebSocketMiddleman | undefined;
-		}
+		//interface Locals {}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
