@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fastapi-ws"
+version = "0.1.0"
+description = ""
+authors = ["Jaroslav Staněk <j.stanek@datalife.cz>"]
+packages = [{include = "fastapi_ws"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.2"
+uvicorn = {extras = ["standard"], version = "^0.27.0.post1"}
+icecream = {version = "^2.1.3", extras = ["dev"]}
+black = {version = "^24.1.1", extras = ["dev"]}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
