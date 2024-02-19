@@ -3,15 +3,19 @@
   import { closeWebSocketConnection, createWebSocketConnection } from '$lib/middleware/websocket.tools';
   import { P, Toolbar, ToolbarButton } from 'flowbite-svelte';
   import Disconnect from "~icons/mdi/lan-disconnect";
+ 	import { websocket } from '@ubermanu/sveltekit-websocket/stores';
   import Connect from "~icons/mdi/lan-connect";
+  import Broadcast from "~icons/mdi/broadcast";
   function disconnect(){
-    if($storeWsConnection)
-      closeWebSocketConnection($storeWsConnection);
+    if($storeWsConnection) closeWebSocketConnection($storeWsConnection);
   }
 
   function connect(){
-    if(!$storeWsConnection)
-      storeWsConnection.set(createWebSocketConnection($storeWsConnection));
+    if(!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url));
+  }
+
+  function broadcast(){
+    fetch(`http://localhost:8000/test`)
   }
 </script>
 
@@ -22,6 +26,7 @@
 <Toolbar>
   <ToolbarButton class="flex gap-2" on:click={connect} variant="outline" color="red"><Connect /> Connect</ToolbarButton>
   <ToolbarButton class="flex gap-2" on:click={disconnect} variant="outline" color="red"><Disconnect /> Disconnect</ToolbarButton>
+  <ToolbarButton class="flex gap-2" on:click={broadcast} variant="outline" color="red"><Broadcast /> Test Broadcast</ToolbarButton>
 </Toolbar>
 
 <P>

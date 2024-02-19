@@ -1,8 +1,7 @@
 import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websockets.store';
 import { browser } from '$app/environment';
-
 export function closeWebSocketConnection(connection: WebSocket) {
-	connection.close();
+	connection.close(4000, 'Connection closed by user');
 	storeConnected.set(false);
 	storeWsConnection.set(null);
 }
@@ -23,13 +22,15 @@ export function createWebSocketConnection(url: string): WebSocket | null {
 			registerMessage(JSON.stringify(JSON.parse(event.data), null, 2));
 		});
 
-		connection.addEventListener('close', () => {
+		connection.addEventListener('close', (event) => {
 			registerMessage('Connection with websocket has been closed.');
 			storeConnected.set(false);
-			reconnectionManager = setInterval(() => {
-				registerMessage('Trying reconnection to the websockets');
-				storeWsConnection.set(createWebSocketConnection(url));
-			}, 30000);
+			if (event.code !== 4000) {
+				reconnectionManager = setInterval(() => {
+					registerMessage('Trying reconnection to the websockets');
+					storeWsConnection.set(createWebSocketConnection(url));
+				}, 5000);
+			}
 		});
 	}
 	return connection;
