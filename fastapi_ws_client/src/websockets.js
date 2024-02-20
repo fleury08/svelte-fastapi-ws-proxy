@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import WebSocket from 'ws';
+//import { FRONTEND_WEBSOCKETS_TIMEOUT } from '$env/static/private';
 
 export class WebSocketMiddleman {
 	/** @type {import('ws').WebSocket} */
@@ -12,13 +13,15 @@ export class WebSocketMiddleman {
 	backendConnection;
 
 	/** @type {string | number | NodeJS.Timeout | undefined}*/
-	pingTimeout;
+	pingTimeoutObject;
 
 	/** @type {string}*/
 	__backendWSId;
 
 	/** @type {string}*/
 	backendAddress;
+
+	pingWSTimeout = Number(30000) + 1000;
 
 	/**
 	 * @param {import('ws').WebSocket} frontendConnection
@@ -42,11 +45,11 @@ export class WebSocketMiddleman {
 		connection.on('ping', () => {
 			if (!connection) throw new Error('Connection not open');
 			console.log(this.wsSessionId, 'received ping');
-			clearTimeout(this.pingTimeout);
-			this.pingTimeout = setTimeout(() => {
+			clearTimeout(this.pingTimeoutObject);
+			this.pingTimeoutObject = setTimeout(() => {
 				connection.terminate();
 				this.frontendConnection.terminate();
-			}, 30000 + 1000);
+			}, this.pingWSTimeout);
 		});
 
 		connection.on('message', (data) => {
@@ -56,8 +59,6 @@ export class WebSocketMiddleman {
 			if (message.message === 'connected') {
 				this.__backendWSId = message.session_id;
 				console.log('internal sessionID:', this.__backendWSId);
-			}
-			if (message.message === 'update') {
 			}
 
 			this.frontendConnection.send(data.toString());
@@ -69,7 +70,7 @@ export class WebSocketMiddleman {
 		connection.on('close', () => {
 			if (!connection) throw new Error("Connection doesn't exist");
 			this.frontendConnection.close();
-			clearTimeout(this.pingTimeout);
+			clearTimeout(this.pingTimeoutObject);
 			console.log(this.wsSessionId, 'closed');
 			console.log('Websocket connection closed');
 		});
@@ -92,7 +93,7 @@ export class WebSocketMiddleman {
 			this.frontendConnection.close();
 			this.backendConnection.close();
 		}
-		clearTimeout(this.pingTimeout);
+		clearTimeout(this.pingTimeoutObject);
 		console.log(`Closed Backend WS connection ${this.wsSessionId}`);
 	}
 }

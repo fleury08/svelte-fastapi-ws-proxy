@@ -6,6 +6,10 @@
  	import { websocket } from '@ubermanu/sveltekit-websocket/stores';
   import Connect from "~icons/mdi/lan-connect";
   import Broadcast from "~icons/mdi/broadcast";
+  import type {PageData} from './$types';
+
+  export let data: PageData;
+
   function disconnect(){
     if($storeWsConnection) closeWebSocketConnection($storeWsConnection);
   }
@@ -15,7 +19,7 @@
   }
 
   function broadcast(){
-    fetch(`http://localhost:8000/test`)
+    fetch(`${data.backend_api}/test`)
   }
 </script>
 
