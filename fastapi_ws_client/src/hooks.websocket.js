@@ -4,10 +4,8 @@ import { WebSocketMiddleman } from './websockets.js';
 
 /** @type {import('@ubermanu/sveltekit-websocket').Handle} */
 export const handle = async ({ socket, request }) => {
-	console.log(request.headers)
 	const backendWebsocketsURL = "http://localhost:8000/ws";
 
-	console.log(process.env);
 	const authToken = true; //todo: aktivni token soucasti dotazu na server;
 
 	if (authToken && backendWebsocketsURL) {
