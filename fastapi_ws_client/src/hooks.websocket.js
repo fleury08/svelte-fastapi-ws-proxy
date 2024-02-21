@@ -1,13 +1,23 @@
+/**
+ * This hook file is used by plugin `@ubermanu/sveltekit-websocket`
+ * Creates websocket connection with browser/client
+ * Connection then
+ * Client connection is  wrapped in `WebSocketMiddleman`
+ *
+ */
+
 import { v4 as uuidv4 } from 'uuid';
-import { WebSocketMiddleman } from './websockets.js';
-//import { BACKEND_API_URL } from '$env/static/private';
+import { WebSocketMiddleman } from './websockets-middleman.js';
+import cookie from 'cookie';
+
 
 /** @type {import('@ubermanu/sveltekit-websocket').Handle} */
 export const handle = async ({ socket, request }) => {
-	const backendWebsocketsURL = "http://localhost:8000/ws";
+	const backendWebsocketsURL = process.env.VITE_BACKEND_WEBSOCKETS_URL;
+	const cookieObject = cookie.parse(request.headers.cookie || '');
+	const authToken = authTokenHandle( JSON.stringify(cookieObject)); //todo: aktivni token soucasti dotazu na server;
 
-	const authToken = true; //todo: aktivni token soucasti dotazu na server;
-
+	//console.log(cookieObject);
 	if (authToken && backendWebsocketsURL) {
 		const sessionId = uuidv4();
 		const backendConnection = new WebSocketMiddleman(socket, backendWebsocketsURL, sessionId);
@@ -29,3 +39,13 @@ export const handle = async ({ socket, request }) => {
 	console.log('Websockets needs token!');
 	socket.close();
 };
+
+/**
+ *
+ * @param token {string}
+ * @returns {boolean}
+ */
+function authTokenHandle(token) {
+	return !!token;
+
+}

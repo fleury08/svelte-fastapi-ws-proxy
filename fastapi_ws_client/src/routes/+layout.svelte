@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.pcss';
 	import { websocket } from '@ubermanu/sveltekit-websocket/stores';
-	import { storeWsConnection } from '$lib/stores/websockets.store';
+	import { storeWsConnection } from '$lib/stores/websocket.store';
 	import { createWebSocketConnection } from '$lib/middleware/websocket.tools';
 
 	storeWsConnection.set(createWebSocketConnection($websocket.url));

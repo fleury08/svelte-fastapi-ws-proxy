@@ -1,4 +1,4 @@
-import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websockets.store';
+import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websocket.store';
 import { browser } from '$app/environment';
 export function closeWebSocketConnection(connection: WebSocket) {
 	connection.close(4000, 'Connection closed by user');
@@ -8,7 +8,7 @@ export function closeWebSocketConnection(connection: WebSocket) {
 
 let reconnectionManager: ReturnType<typeof setInterval>;
 
-export function createWebSocketConnection(url: string): WebSocket | null {
+export function createWebSocketConnection(url: string, wstimeout: number = 30000): WebSocket | null {
 	const connection = browser ? new WebSocket(url) : null;
 
 	if (connection) {
@@ -29,7 +29,7 @@ export function createWebSocketConnection(url: string): WebSocket | null {
 				reconnectionManager = setInterval(() => {
 					registerMessage('Trying reconnection to the websockets');
 					storeWsConnection.set(createWebSocketConnection(url));
-				}, 5000);
+				}, wstimeout + 1000);
 			}
 		});
 	}

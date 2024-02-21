@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import WebSocket from 'ws';
 
-//import { FRONTEND_WEBSOCKETS_TIMEOUT } from '$env/static/private';
 
 export class WebSocketMiddleman {
 	/** @type {import('ws').WebSocket} */
@@ -22,7 +21,8 @@ export class WebSocketMiddleman {
 	/** @type {string}*/
 	backendAddress;
 
-	pingWSTimeout = Number(30000) + 1000;
+	/** @type {number}*/
+	pingWSTimeout = Number.parseInt(process.env.VITE_FRONTEND_WEBSOCKETS_TIMEOUT || "5000") + 1000;
 
 	/**
 	 * @param {import('ws').WebSocket} frontendConnection
@@ -47,10 +47,12 @@ export class WebSocketMiddleman {
 			if (!connection) throw new Error('Connection not open');
 			console.log(this.wsSessionId, 'received ping');
 			clearTimeout(this.pingTimeoutObject);
+			console.log(this.wsSessionId, 'cleared ping timeout');
 			this.pingTimeoutObject = setTimeout(() => {
 				connection.terminate();
 				this.frontendConnection.terminate();
 			}, this.pingWSTimeout);
+			console.log(this.wsSessionId, 'set ping timeout');
 		});
 
 		connection.on('message', (data) => {
