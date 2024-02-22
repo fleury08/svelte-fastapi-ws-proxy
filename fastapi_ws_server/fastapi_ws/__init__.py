@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import FastAPI, WebSocket, WebSocketException
+from starlette.routing import Route
 from starlette.websockets import WebSocketDisconnect
 
 from .connectionmanager import ws_conn_manager
@@ -13,7 +14,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @app.websocket("/ws")
-async def ws(websocket: WebSocket):
+async def create_webservice(websocket: WebSocket):
     ws_uuid = str(uuid.uuid4())
     try:
         token_id = websocket.query_params.get("token")
@@ -37,7 +38,7 @@ async def ws(websocket: WebSocket):
 
 
 @app.get("/message")
-async def test_server_send():
+async def send_message_to_all():
     return await ws_conn_manager.broadcast(
         {
             "message": "broadcast",
@@ -49,7 +50,7 @@ async def test_server_send():
 
 
 @app.get("/message/{user_id}")
-async def test_server_send(connection_id: str):
+async def send_message_to_user(connection_id: str):
     await ws_conn_manager.send_message(
         connection_id,
         {
@@ -62,6 +63,13 @@ async def test_server_send(connection_id: str):
 
 
 @app.get("/random-token")
-async def create_random_token():
+async def get_random_token():
     token = str(uuid.uuid4())
     return {"token": token}
+
+
+@app.get("/endpoints")
+def get_all_endpoints():
+    route: Route
+    url_list = [{"path": route.path, "name": route.name} for route in app.routes]
+    return url_list

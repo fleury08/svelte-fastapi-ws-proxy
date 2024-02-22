@@ -1,56 +1,101 @@
 <script lang="ts">
-  import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websocket.store.js';
-  import { closeWebSocketConnection, createWebSocketConnection } from '$lib/middleware/websocket.tools';
-  import { P, Toolbar, ToolbarButton } from 'flowbite-svelte';
-  import Disconnect from "~icons/mdi/lan-disconnect";
- 	import { websocket } from '@ubermanu/sveltekit-websocket/stores';
-  import Connect from "~icons/mdi/lan-connect";
-  import Random from "~icons/mdi/shuffle";
-  import Broadcast from "~icons/mdi/broadcast";
-  import type {PageData} from './$types';
+	import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websocket.store.js'
+	import { closeWebSocketConnection, createWebSocketConnection } from '$lib/tools/websocket/websocket.tools'
+	import { Activity, ActivityItem, type ActivityType, P, Toolbar, ToolbarButton } from 'flowbite-svelte'
+	import Disconnect from '~icons/mdi/lan-disconnect'
+	import { websocket } from '@ubermanu/sveltekit-websocket/stores'
+	import Connect from '~icons/mdi/lan-connect'
+	import Random from '~icons/mdi/shuffle'
+	import Broadcast from '~icons/mdi/broadcast'
+	import type { PageData } from './$types'
+	import moment from 'moment'
+	import { onMount } from 'svelte'
+	import { ApiProxyTool } from '$lib/tools/api-proxy/api-proxy.tools'
 
-  export let data: PageData;
+	export let data: PageData
+	// let wsEndpoints: string[] = []
+	let apiProxyTool: ApiProxyTool
 
-  function disconnect(){
-    if($storeWsConnection) closeWebSocketConnection($storeWsConnection);
-  }
+	let apiActivities: ActivityType[] = []
 
-  function connect(){
-    if(!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout));
-  }
+	onMount(async () => {
+		apiProxyTool = new ApiProxyTool(data.api_proxy)
+		// wsEndpoints = await fetch(`${data.api_proxy}/endpoints`).then(res => res.json()) || []
+	})
 
-  function broadcast(){
-    const url = `${data.api_proxy}/message`
-    fetch(url,{
-      mode: 'cors'
-    })
-  }
+	function disconnect() {
+		if ($storeWsConnection) closeWebSocketConnection()
+	}
 
-  function setRandomToken(){
-    const url = `${data.api_proxy}/set-token`
-    fetch(url)
-  }
+	function connect() {
+		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout))
+	}
+
+	async function apiProxyAction(event: Event) {
+		const target: HTMLElement = event?.currentTarget as HTMLElement
+		const action = target?.getAttribute('data-action') || undefined
+		const activity = await apiProxyTool.handle(action).then(r => r)
+		apiActivities = [...apiActivities, {
+			title: action || 'No action',
+			date: moment().toDate(),
+			text: JSON.stringify(activity, null, 2),
+			src: '',
+			alt: ''
+		}]
+	}
+
+
+	$: wsActivities = $storeWsMessages.map((msg): ActivityType => {
+		return {
+			title: msg.message,
+			date: moment(msg.timestamp).toDate(),
+			text: msg?.text,
+			src: '',
+			alt: ''
+		}
+	})
+
 </script>
 
 
+<div class="flex flex-col gap-3">
+	<div class="text-4xl head">WebSockets test</div>
+	<Toolbar class="flex w-100 sticky top-0 shadow">
+		<P>
+			Websocket connection status: {$storeConnected ? '🟢' : '🔴'}
+		</P>
+		<ToolbarButton class="flex gap-2" on:click={apiProxyAction} data-action="/random-token" variant="outline"
+									 color="red">
+			<Random />
+			Set Random Token
+		</ToolbarButton>
+		<ToolbarButton class="flex gap-2" on:click={connect} variant="outline" color="red">
+			<Connect />
+			Connect
+		</ToolbarButton>
+		<ToolbarButton class="flex gap-2" on:click={disconnect} variant="outline" color="red">
+			<Disconnect />
+			Disconnect
+		</ToolbarButton>
+		<ToolbarButton class="flex gap-2" on:click={apiProxyAction} data-action="/message" variant="outline" color="red">
+			<Broadcast />
+			Test Broadcast
+		</ToolbarButton>
+	</Toolbar>
 
-<div class="text-4xl head">WebSockets test</div>
-
-<Toolbar>
-  <ToolbarButton class="flex gap-2" on:click={setRandomToken} variant="outline" color="red"><Random /> Set Random Token</ToolbarButton>
-  <ToolbarButton class="flex gap-2" on:click={connect} variant="outline" color="red"><Connect /> Connect</ToolbarButton>
-  <ToolbarButton class="flex gap-2" on:click={disconnect} variant="outline" color="red"><Disconnect /> Disconnect</ToolbarButton>
-  <ToolbarButton class="flex gap-2" on:click={broadcast} variant="outline" color="red"><Broadcast /> Test Broadcast</ToolbarButton>
-</Toolbar>
-
-<P>
-  Websocket connection status: {$storeConnected ? '🟢' : '🔴'}
-</P>
-
-
-<ul>
-  {#each $storeWsMessages as message}
-    <li><pre>{message}</pre></li>
-  {/each}
-</ul>
-
+	<!--	<pre>{JSON.stringify(wsEndpoints, null, 2)}</pre>-->
+	<div class="flex gap-3 w-100">
+		<div class="flex flex-col w-100 gap-3">
+			<div class="h1">WS Activity</div>
+			<Activity>
+				<ActivityItem activities={wsActivities} />
+			</Activity>
+		</div>
+		<div class="flex flex-col w-100 gap-3">
+			<div class="h1">API Activity</div>
+			<Activity>
+				<ActivityItem activities={apiActivities} />
+			</Activity>
+		</div>
+	</div>
+</div>

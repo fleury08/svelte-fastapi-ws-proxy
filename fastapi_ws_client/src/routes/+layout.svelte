@@ -2,9 +2,11 @@
 	import '../app.pcss';
 	import { websocket } from '@ubermanu/sveltekit-websocket/stores';
 	import { storeWsConnection } from '$lib/stores/websocket.store';
-	import { createWebSocketConnection } from '$lib/middleware/websocket.tools';
+	import { createWebSocketConnection } from '$lib/tools/websocket/websocket.tools';
 
 	storeWsConnection.set(createWebSocketConnection($websocket.url));
 </script>
 
-<slot />
+<div class="container mx-auto">
+	<slot />
+</div>

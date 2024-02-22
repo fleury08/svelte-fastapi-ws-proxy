@@ -1,6 +1,8 @@
-import { writable } from 'svelte/store';
+import { writable } from 'svelte/store'
 
-export const storeConnected = writable<boolean>(false);
-export const storeWsMessages = writable<string[]>([]);
+import type { WebSocketMessage } from '$lib/tools/websocket/websocket.message'
 
-export const storeWsConnection = writable<WebSocket | null>(null);
+export const storeConnected = writable<boolean>(false)
+export const storeWsMessages = writable<WebSocketMessage[]>([])
+
+export const storeWsConnection = writable<WebSocket | null>(null)

@@ -1,19 +1,16 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vitest/config';
-import { websocket } from '@ubermanu/sveltekit-websocket/vite';
-import Icons from 'unplugin-icons/vite';
-import { loadEnv } from 'vite';
+import { sveltekit } from '@sveltejs/kit/vite'
+import { defineConfig } from 'vitest/config'
+import { websocket } from '@ubermanu/sveltekit-websocket/vite'
+import Icons from 'unplugin-icons/vite'
+import { loadEnv } from 'vite'
 
-export default defineConfig(({mode})=>{
+export default defineConfig(({ mode }) => {
 	/* IMPORTANT: Load env variables from .env file
 	 * Plugins do not work without this, in this case Websocket plugin
 	 * won't load any svelte env variables from .env file
-		*/
-	process.env = {...process.env, ...(loadEnv(mode, process.cwd()))};
+	 */
+	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
 	return {
-		server: {
-    	origin: 'http://127.0.0.1:8080',
-  	},
 		plugins: [
 			sveltekit(),
 			Icons({
@@ -26,4 +23,4 @@ export default defineConfig(({mode})=>{
 			include: ['src/**/*.{test,spec}.{js,ts}']
 		}
 	}
-});
+})
