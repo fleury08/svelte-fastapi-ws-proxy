@@ -35,21 +35,21 @@
 		const target: HTMLElement = event?.currentTarget as HTMLElement
 		const action = target?.getAttribute('data-action') || undefined
 		const activity = await apiProxyTool.handle(action).then(r => r)
-		apiActivities = [...apiActivities, {
+		apiActivities = [ {
 			title: action || 'No action',
-			date: moment().toDate(),
+			date: moment().format("LLL"),
 			text: JSON.stringify(activity, null, 2),
 			src: '',
 			alt: ''
-		}]
+		}, ...apiActivities]
 	}
 
 
 	$: wsActivities = $storeWsMessages.map((msg): ActivityType => {
 		return {
 			title: msg.message,
-			date: moment(msg.timestamp).toDate(),
-			text: msg?.text,
+			date: moment(msg.timestamp).format("LLL"),
+			text: msg?.raw ? JSON.stringify(JSON.parse(msg.raw), null, 2) : "",
 			src: '',
 			alt: ''
 		}
@@ -60,7 +60,7 @@
 
 <div class="flex flex-col gap-3">
 	<div class="text-4xl head">WebSockets test</div>
-	<Toolbar class="flex w-100 sticky top-0 shadow">
+	<Toolbar class="flex w-100 sticky top-0 shadow z-10">
 		<P>
 			Websocket connection status: {$storeConnected ? '🟢' : '🔴'}
 		</P>
@@ -84,16 +84,16 @@
 	</Toolbar>
 
 	<!--	<pre>{JSON.stringify(wsEndpoints, null, 2)}</pre>-->
-	<div class="flex gap-3 w-100">
-		<div class="flex flex-col w-100 gap-3">
+	<div class="grid grid-cols-2 gap-3 w-100 ">
+		<div class="flex flex-col gap-3">
 			<div class="h1">WS Activity</div>
-			<Activity>
+			<Activity class="p-4 w-100">
 				<ActivityItem activities={wsActivities} />
 			</Activity>
 		</div>
-		<div class="flex flex-col w-100 gap-3">
+		<div class="flex flex-col gap-3">
 			<div class="h1">API Activity</div>
-			<Activity>
+			<Activity class="p-4 w-100">
 				<ActivityItem activities={apiActivities} />
 			</Activity>
 		</div>

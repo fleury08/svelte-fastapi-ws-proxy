@@ -9,7 +9,7 @@ export function closeWebSocketConnection() {
 	storeConnected.set(false)
 	storeWsConnection.set(null)
 }
-
+let connectionSessionId: string
 let reconnectionManager: ReturnType<typeof setInterval>
 
 export function createWebSocketConnection(
@@ -26,11 +26,17 @@ export function createWebSocketConnection(
 		})
 
 		connection.addEventListener('message', (event: MessageEvent) => {
-			handleMessage(JSON.parse(event.data))
+			const message = JSON.parse(event.data) as WebSocketMessage
+			message.raw = event.data
+			handleMessage(message, (message) => {
+				if (message.message === 'connected' && message.session_id)
+					connectionSessionId = message.session_id
+			})
 		})
 
 		connection.addEventListener('close', (event) => {
-			console.log('Connection with tools has been closed.')
+			const message = {message: 'disconnected', session_id: connectionSessionId} as WebSocketMessage
+			handleMessage(message)
 			storeConnected.set(false)
 			storeWsConnection.set(null)
 			if (event.code !== 4000) {
@@ -44,9 +50,10 @@ export function createWebSocketConnection(
 	return connection
 }
 
-export function handleMessage(message: WebSocketMessage) {
+export function handleMessage(message: WebSocketMessage, callback?: (message: WebSocketMessage) => void) {
 	storeWsMessages.update((messages) => {
-		return [...messages, message]
+		return [ message, ...messages]
 	})
+	if (callback) callback(message)
 	console.log(message)
 }

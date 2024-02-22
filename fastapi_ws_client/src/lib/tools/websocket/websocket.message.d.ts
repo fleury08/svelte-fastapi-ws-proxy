@@ -3,6 +3,7 @@ export type WebSocketMessage = {
 	session_id?: string
 	from?: string
 	timestamp?: string
+	raw?: string
 	[key: string]: any
 }
 
