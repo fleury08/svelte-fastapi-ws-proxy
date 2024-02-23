@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 
-import type { WebSocketMessage } from '$lib/tools/websocket/websocket.message'
+import type { WebSocketMessage } from '$lib/client/tools/websocket/websocket.message'
 
 export const storeConnected = writable<boolean>(false)
 export const storeWsMessages = writable<WebSocketMessage[]>([])

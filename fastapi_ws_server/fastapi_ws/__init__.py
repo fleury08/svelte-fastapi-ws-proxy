@@ -49,14 +49,14 @@ async def send_message_to_all():
     )
 
 
-@app.get("/message/{user_id}")
-async def send_message_to_user(connection_id: str):
+@app.get("/message/{session_id}")
+async def send_message_to_user(session_id: str):
     await ws_conn_manager.send_message(
-        connection_id,
+        session_id,
         {
-            "message": "only to connection " + connection_id,
+            "message": "only to connection " + session_id,
             "from": "server",
-            "to": connection_id,
+            "to": session_id,
             "timestamp": datetime.now().isoformat(),
         },
     )

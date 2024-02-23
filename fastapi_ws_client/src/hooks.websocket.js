@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
-import { WebSocketMiddleman } from './lib/tools/websocket/websockets-middleman.js'
+import { WebSocketMiddleman } from './lib/client/tools/websocket/websockets-middleman.js'
 import cookie from 'cookie'
 
 /** @type {import('@ubermanu/sveltekit-websocket').Handle} */
@@ -16,7 +16,6 @@ export const handle = async ({ socket, request }) => {
 	const cookieObject = cookie.parse(request.headers.cookie || '')
 	const authToken = authTokenHandle(JSON.stringify(cookieObject)) //todo: aktivni token soucasti dotazu na server;
 
-	//console.log(cookieObject);
 	if (authToken && backendWebsocketsURL) {
 		const sessionId = uuidv4()
 		const backendConnection = new WebSocketMiddleman(socket, backendWebsocketsURL, sessionId)

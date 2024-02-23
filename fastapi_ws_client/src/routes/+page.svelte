@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websocket.store.js'
-	import { closeWebSocketConnection, createWebSocketConnection } from '$lib/tools/websocket/websocket.tools'
+	import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/client/stores/websocket.store.js'
+	import { closeWebSocketConnection, createWebSocketConnection } from '$lib/client/tools/websocket/websocket.tools'
 	import { Activity, ActivityItem, type ActivityType, P, Toolbar, ToolbarButton } from 'flowbite-svelte'
 	import Disconnect from '~icons/mdi/lan-disconnect'
 	import { websocket } from '@ubermanu/sveltekit-websocket/stores'
@@ -10,7 +10,7 @@
 	import type { PageData } from './$types'
 	import moment from 'moment'
 	import { onMount } from 'svelte'
-	import { ApiProxyTool } from '$lib/tools/api-proxy/api-proxy.tools'
+	import { ApiProxyTool } from '$lib/client/tools/api-proxy/api-proxy.tools'
 
 	export let data: PageData
 	// let wsEndpoints: string[] = []
@@ -67,7 +67,7 @@
 		<ToolbarButton class="flex gap-2" on:click={apiProxyAction} data-action="/random-token" variant="outline"
 									 color="red">
 			<Random />
-			Set Random Token
+			Get Random Token
 		</ToolbarButton>
 		<ToolbarButton class="flex gap-2" on:click={connect} variant="outline" color="red">
 			<Connect />

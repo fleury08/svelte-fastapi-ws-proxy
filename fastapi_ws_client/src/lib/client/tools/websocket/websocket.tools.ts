@@ -1,7 +1,11 @@
-import { storeConnected, storeWsConnection, storeWsMessages } from '$lib/stores/websocket.store'
+import {
+	storeConnected,
+	storeWsConnection,
+	storeWsMessages
+} from '$lib/client/stores/websocket.store'
 import { browser } from '$app/environment'
 import { get } from 'svelte/store'
-import type { WebSocketMessage } from '$lib/tools/websocket/websocket.message'
+import type { WebSocketMessage } from '$lib/client/tools/websocket/websocket.message'
 
 export function closeWebSocketConnection() {
 	const conn = get(storeWsConnection)
@@ -35,7 +39,10 @@ export function createWebSocketConnection(
 		})
 
 		connection.addEventListener('close', (event) => {
-			const message = {message: 'disconnected', session_id: connectionSessionId} as WebSocketMessage
+			const message = {
+				message: 'disconnected',
+				session_id: connectionSessionId
+			} as WebSocketMessage
 			handleMessage(message)
 			storeConnected.set(false)
 			storeWsConnection.set(null)
@@ -50,9 +57,12 @@ export function createWebSocketConnection(
 	return connection
 }
 
-export function handleMessage(message: WebSocketMessage, callback?: (message: WebSocketMessage) => void) {
+export function handleMessage(
+	message: WebSocketMessage,
+	callback?: (message: WebSocketMessage) => void
+) {
 	storeWsMessages.update((messages) => {
-		return [ message, ...messages]
+		return [message, ...messages]
 	})
 	if (callback) callback(message)
 	console.log(message)

@@ -7,10 +7,10 @@ export class ApiProxyTool {
 		if (options) this.options = options
 	}
 
-	handle(path?: string) {
-		if (!path) return Promise.reject('No path provided')
+	async handle(path?: string) {
+		if (!path) return new Error('No path provided')
 		return fetch(`${this.apiBaseUrl}${path}`, this.options).then((res) => res.json())
 	}
 }
 
-export default {}
+export default ApiProxyTool
