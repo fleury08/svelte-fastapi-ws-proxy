@@ -1,15 +1,20 @@
 export class ApiProxyTool {
 	apiBaseUrl: string | URL
-	options: RequestInit | undefined
+	options: RequestInit = {}
 
 	constructor(apiBaseUrl: string | URL, options?: RequestInit) {
 		this.apiBaseUrl = apiBaseUrl
 		if (options) this.options = options
 	}
 
-	async handle(path?: string) {
+	updateOptions(options: RequestInit) {
+		if (!options) return
+		this.options = { ...this.options, ...options }
+	}
+
+	async handle(path?: string, options?: RequestInit) {
 		if (!path) return new Error('No path provided')
-		return fetch(`${this.apiBaseUrl}${path}`, this.options).then((res) => res.json())
+		return fetch(`${this.apiBaseUrl}${path}`, options ?? this.options)
 	}
 }
 

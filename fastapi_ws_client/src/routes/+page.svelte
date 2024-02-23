@@ -11,6 +11,8 @@
 	import moment from 'moment'
 	import { onMount } from 'svelte'
 	import { ApiProxyTool } from '$lib/client/tools/api-proxy/api-proxy.tools'
+	import { type SecurityToken, storeAuthToken } from '$lib/client/stores/security.store'
+	import { get } from 'svelte/store'
 
 	export let data: PageData
 	// let wsEndpoints: string[] = []
@@ -31,19 +33,26 @@
 		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout))
 	}
 
-	async function apiProxyAction(event: Event) {
+	async function apiProxyAction(event: Event, callback?: CallableFunction) {
 		const target: HTMLElement = event?.currentTarget as HTMLElement
 		const action = target?.getAttribute('data-action') || undefined
-		const activity = await apiProxyTool.handle(action).then(r => r)
+		const apiResponse = await apiProxyTool.handle(action).catch(e=>e).then(r=>r.json())
+		if(callback) callback(apiResponse)
 		apiActivities = [ {
 			title: action || 'No action',
 			date: moment().format("LLL"),
-			text: JSON.stringify(activity, null, 2),
+			text: JSON.stringify(apiResponse, null, 2),
 			src: '',
 			alt: ''
 		}, ...apiActivities]
 	}
 
+  function setSecurityToken(securityToken: SecurityToken) {
+		if (!securityToken || !securityToken.token) return
+		//TODO: typecheck before update
+		storeAuthToken.set(securityToken)
+		apiProxyTool.updateOptions({headers: {Authorization: `Bearer ${securityToken.token}`}})
+		}
 
 	$: wsActivities = $storeWsMessages.map((msg): ActivityType => {
 		return {
@@ -59,13 +68,14 @@
 
 
 <div class="flex flex-col gap-3">
-	<div class="text-4xl head">WebSockets test</div>
 	<Toolbar class="flex w-100 sticky top-0 shadow z-10">
 		<P>
 			Websocket connection status: {$storeConnected ? '🟢' : '🔴'}
 		</P>
-		<ToolbarButton class="flex gap-2" on:click={apiProxyAction} data-action="/random-token" variant="outline"
+
+		<ToolbarButton class="flex gap-2" on:click={(event)=>apiProxyAction(event, setSecurityToken)} data-action="/random-token" variant="outline"
 									 color="red">
+
 			<Random />
 			Get Random Token
 		</ToolbarButton>
