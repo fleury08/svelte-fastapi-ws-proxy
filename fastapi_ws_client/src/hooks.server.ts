@@ -3,16 +3,24 @@
  * to intercept requests to `/api-proxy` and handle them with `handleApiProxy`.
  */
 
-import { type Handle } from '@sveltejs/kit';
-import { VITE_API_PROXY_PATH } from '$env/static/private';
-import { handleApiProxy } from '$lib/server/api-proxy.handle';
-
+import { type Handle } from '@sveltejs/kit'
+import { VITE_API_PROXY_PATH } from '$env/static/private'
+import { handleApiProxy } from '$lib/server/api-proxy.handle'
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// intercept requests to `/api-proxy` and handle them with `handleApiProxy`
-  if (event.url.pathname.startsWith(VITE_API_PROXY_PATH)) {
-    return handleApiProxy({ event, resolve });
-  }
+	if (event.url.pathname.startsWith(VITE_API_PROXY_PATH)) {
+		return handleApiProxy({ event, resolve })
+	}
 
-	return resolve(event);
-};
+	return resolve(event)
+}
+
+// export const handleFetch: HandleFetch = async ({ request, fetch }) => {
+// 	if (request.url.startsWith(apiUrl)) {
+// 		// Workaround: https://github.com/sveltejs/kit/issues/6608
+// 		request.headers.set('origin', appUrl)
+// 	}
+//
+// 	return fetch(request)
+// }

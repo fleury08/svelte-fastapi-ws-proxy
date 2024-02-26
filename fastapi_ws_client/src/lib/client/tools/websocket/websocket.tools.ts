@@ -43,12 +43,12 @@ export function createWebSocketConnection(
 				message: 'disconnected',
 				session_id: connectionSessionId
 			} as WebSocketMessage
+			clearInterval(reconnectionManager)
 			handleMessage(message)
 			storeConnected.set(false)
 			storeWsConnection.set(null)
 			if (event.code !== 4000) {
 				reconnectionManager = setInterval(() => {
-					console.log('Trying reconnection to the websockets')
 					storeWsConnection.set(createWebSocketConnection(url))
 				}, wstimeout + 1000)
 			}

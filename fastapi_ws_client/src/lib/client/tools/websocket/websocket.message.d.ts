@@ -4,11 +4,11 @@ export type WebSocketMessage = {
 	from?: string
 	timestamp?: string
 	raw?: string
-	[key: string]: any
+	[key: string]: never
 }
 
 export type WebSocketMessageData = WebSocketMessage & {
-	data: any
+	data: unknown
 }
 
 export type WebSocketMessageText = WebSocketMessage & {

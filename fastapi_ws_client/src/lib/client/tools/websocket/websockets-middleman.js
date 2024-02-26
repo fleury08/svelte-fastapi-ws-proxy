@@ -21,7 +21,7 @@ export class WebSocketMiddleman {
 	backendAddress
 
 	/** @type {number}*/
-	pingWSTimeout = Number.parseInt(process.env.VITE_FRONTEND_WEBSOCKETS_TIMEOUT || '5000') + 1000
+	pingWSTimeout = Number.parseInt(process.env.VITE_FRONTEND_WEBSOCKETS_TIMEOUT || '30000') + 1000
 
 	/**
 	 * @param {import('ws').WebSocket} frontendConnection
@@ -34,6 +34,7 @@ export class WebSocketMiddleman {
 		this.wsSessionId = wsSessionId ?? uuidv4()
 		this.__backendWSId = ''
 		this.backendConnection = undefined
+		console.log('ping timeout:', this.pingWSTimeout)
 	}
 
 	connectToWs() {
@@ -66,14 +67,11 @@ export class WebSocketMiddleman {
 
 			this.frontendConnection.send(String(data))
 		})
-		connection.on('pong', () => {
-			console.log('pong')
-		})
 
 		connection.on('close', () => {
 			if (!connection) throw new Error("Connection doesn't exist")
-			this.frontendConnection.close()
 			clearTimeout(this.pingTimeoutObject)
+			this.frontendConnection.close()
 			console.log(this.wsSessionId, 'closed')
 			console.log('Websocket connection closed')
 		})
@@ -93,8 +91,8 @@ export class WebSocketMiddleman {
 
 	terminate() {
 		if (this.backendConnection !== undefined) {
-			this.frontendConnection.close()
-			this.backendConnection.close()
+			this.frontendConnection.terminate()
+			this.frontendConnection.terminate()
 		}
 		clearTimeout(this.pingTimeoutObject)
 		console.log(`Closed Backend WS connection ${this.wsSessionId}`)

@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => {
 			}),
 			websocket()
 		],
+		server: {
+			cors: {
+				credentials: true,
+				origin: 'http://localhost:5173/'
+			}
+		},
 		test: {
 			include: ['src/**/*.{test,spec}.{js,ts}']
 		}

@@ -1,15 +1,14 @@
-import { type Handle } from '@sveltejs/kit'
+import { error, type Handle } from '@sveltejs/kit'
 import { VITE_API_PROXY_PATH, VITE_BACKEND_API_URL } from '$env/static/private'
 
 export const handleApiProxy: Handle = async ({ event }) => {
-	// const origin = event.request.headers.get('Origin')
+	const origin = event.request.headers.get('Origin')
 
-	// console.log(event.request.headers)
 	// reject requests that don't come from the webapp, to avoid your proxy being abused.
 	// TODO: SECURITY RISK MUST BE SOLVED
-	// if (!origin || new URL(origin).origin !== event.url.origin) {
-	//   throw error(403, "Request Forbidden.");
-	// }
+	if (!origin || new URL(origin).origin !== event.url.origin) {
+		throw error(403, 'Request Forbidden.')
+	}
 
 	// strip `/api-proxy` from the request path
 	const strippedPath = event.url.pathname.substring(VITE_API_PROXY_PATH.length)

@@ -12,7 +12,7 @@
 	import { onMount } from 'svelte'
 	import { ApiProxyTool } from '$lib/client/tools/api-proxy/api-proxy.tools'
 	import { type SecurityToken, storeAuthToken } from '$lib/client/stores/security.store'
-	import { get } from 'svelte/store'
+
 
 	export let data: PageData
 	// let wsEndpoints: string[] = []
@@ -21,7 +21,14 @@
 	let apiActivities: ActivityType[] = []
 
 	onMount(async () => {
-		apiProxyTool = new ApiProxyTool(data.api_proxy)
+		apiProxyTool = new ApiProxyTool(data.api_proxy,{
+			credentials: "same-origin",
+			headers:{
+				"Origin": window.location.protocol + '//' + window.location.host,
+			},
+			mode: 'same-origin',
+			cache: 'no-cache'
+		})
 		// wsEndpoints = await fetch(`${data.api_proxy}/endpoints`).then(res => res.json()) || []
 	})
 
