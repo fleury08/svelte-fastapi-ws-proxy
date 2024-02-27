@@ -34,7 +34,7 @@
 	}
 
 	function connect() {
-		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout, 'signal'))
+		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout))
 	}
 
 	async function apiProxyAction(event: Event, callback?: CallableFunction) {

@@ -10,7 +10,14 @@ export default defineConfig(({ mode }) => {
 	 * won't load any svelte env variables from .env file
 	 */
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
-	return {
+	const apiProxyConfig = {}
+	apiProxyConfig[process.env.VITE_API_PROXY_PATH] = {
+		target: process.env.VITE_BACKEND_API_URL,
+		changeOrigin: true,
+		secure: true,
+		rewrite: (path) => path.replace(process.env.VITE_API_PROXY_PATH, '')
+	}
+	const define = {
 		plugins: [
 			sveltekit(),
 			Icons({
@@ -19,8 +26,13 @@ export default defineConfig(({ mode }) => {
 			}),
 			websocket()
 		],
+		server: {
+			proxy: apiProxyConfig
+		},
 		test: {
 			include: ['src/**/*.{test,spec}.{js,ts}']
 		}
 	}
+	console.log(define)
+	return define
 })
