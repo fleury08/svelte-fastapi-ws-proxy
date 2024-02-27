@@ -23,9 +23,6 @@
 	onMount(async () => {
 		apiProxyTool = new ApiProxyTool(data.api_proxy,{
 			credentials: "same-origin",
-			headers:{
-				"Origin": window.location.protocol + '//' + window.location.host,
-			},
 			mode: 'same-origin',
 			cache: 'no-cache'
 		})
@@ -37,7 +34,7 @@
 	}
 
 	function connect() {
-		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout))
+		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout, 'signal'))
 	}
 
 	async function apiProxyAction(event: Event, callback?: CallableFunction) {
@@ -45,9 +42,9 @@
 		const action = target?.getAttribute('data-action') || undefined
 		const apiResponse = await apiProxyTool.handle(action).catch(e=>e).then(r=>r.json())
 		if(callback) callback(apiResponse)
-		apiActivities = [ {
+		apiActivities = [{
 			title: action || 'No action',
-			date: moment().format("LLL"),
+			date: new Date(),
 			text: JSON.stringify(apiResponse, null, 2),
 			src: '',
 			alt: ''

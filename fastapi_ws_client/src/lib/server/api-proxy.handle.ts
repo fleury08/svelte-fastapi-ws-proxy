@@ -5,7 +5,7 @@ export const handleApiProxy: Handle = async ({ event }) => {
 	const origin = event.request.headers.get('Origin')
 
 	// reject requests that don't come from the webapp, to avoid your proxy being abused.
-	// TODO: SECURITY RISK MUST BE SOLVED
+	// TODO: IMPLEMENT CORS HEADERS FOR GET
 	if (!origin || new URL(origin).origin !== event.url.origin) {
 		throw error(403, 'Request Forbidden.')
 	}

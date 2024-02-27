@@ -18,9 +18,10 @@ let reconnectionManager: ReturnType<typeof setInterval>
 
 export function createWebSocketConnection(
 	url: string,
-	wstimeout: number = 30000
+	wstimeout: number = 30000,
+	protocol: string | string[] | undefined = undefined
 ): WebSocket | null {
-	const connection = browser ? new WebSocket(url) : null
+	const connection = browser ? new WebSocket(url, protocol) : null
 
 	if (connection) {
 		connection.addEventListener('open', () => {
@@ -40,7 +41,8 @@ export function createWebSocketConnection(
 
 		connection.addEventListener('close', (event) => {
 			const message = {
-				message: 'disconnected',
+				message: connectionSessionId ? 'disconnected' : 'unavailable',
+				timestamp: new Date().toISOString(),
 				session_id: connectionSessionId
 			} as WebSocketMessage
 			clearInterval(reconnectionManager)
@@ -61,7 +63,7 @@ export function handleMessage(
 	message: WebSocketMessage,
 	callback?: (message: WebSocketMessage) => void
 ) {
-	storeWsMessages.update((messages) => {
+	storeWsMessages.update((messages: WebSocketMessage[]) => {
 		return [message, ...messages]
 	})
 	if (callback) callback(message)
