@@ -9,6 +9,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { WebSocketMiddleman } from './lib/client/tools/websocket/websockets-middleman.js'
 import cookie from 'cookie'
+import { logger } from './lib/server/logger'
 
 /** @type {import('@ubermanu/sveltekit-websocket').Handle} */
 export const handle = async ({ socket, request }) => {
@@ -16,6 +17,7 @@ export const handle = async ({ socket, request }) => {
 	const cookieObject = cookie.parse(request.headers.cookie || '')
 	const authToken = authTokenHandle(JSON.stringify(cookieObject)) //todo: aktivni token soucasti dotazu na server;
 
+	logger.debug(request)
 	if (authToken && backendWebsocketsURL) {
 		const sessionId = uuidv4()
 		const backendConnection = new WebSocketMiddleman(socket, backendWebsocketsURL, sessionId)
@@ -23,18 +25,18 @@ export const handle = async ({ socket, request }) => {
 		backendConnection.connectToWs()
 
 		socket.on('close', () => {
-			console.log(`Closed Frontend WS connection ${sessionId}`)
+			logger.debug(`Closed Frontend WS connection ${sessionId}`)
 			backendConnection.terminate()
 		})
 
 		socket.on('error', (e) => {
-			console.log(e)
+			logger.debug(e)
 			backendConnection.terminate()
 		})
 		return
 	}
 
-	console.log('Websockets needs token!')
+	logger.debug('Websockets needs token!')
 	socket.close()
 }
 

@@ -1,3 +1,4 @@
+import { logger } from '$lib/server/logger'
 import { v4 as uuidv4 } from 'uuid'
 import WebSocket from 'ws'
 
@@ -34,35 +35,35 @@ export class WebSocketMiddleman {
 		this.wsSessionId = wsSessionId ?? uuidv4()
 		this.__backendWSId = ''
 		this.backendConnection = undefined
-		console.log('ping timeout:', this.pingWSTimeout)
+		logger.debug('ping timeout:', this.pingWSTimeout)
 	}
 
 	connectToWs() {
-		console.log('connecting to backend:', this.backendAddress)
+		logger.debug('connecting to backend:', this.backendAddress)
 		if (this.backendConnection !== undefined) return this.backendConnection
 
 		const connection = new WebSocket(this.backendAddress)
 
 		connection.on('ping', () => {
 			if (!connection) throw new Error('Connection not open')
-			console.log(this.wsSessionId, 'received ping')
+			logger.debug(this.wsSessionId, 'received ping')
 			clearTimeout(this.pingTimeoutObject)
-			console.log(this.wsSessionId, 'cleared ping timeout')
+			logger.debug(this.wsSessionId, 'cleared ping timeout')
 			this.pingTimeoutObject = setTimeout(() => {
 				connection.terminate()
 				this.frontendConnection.terminate()
 			}, this.pingWSTimeout)
-			console.log(this.wsSessionId, 'set ping timeout')
+			logger.debug(this.wsSessionId, 'set ping timeout')
 		})
 
 		// {string|Buffer} data - The message data received from the connection, can be a string or binary data.
 		connection.on('message', (data) => {
-			console.log('data:', String(data))
+			logger.debug('data:', String(data))
 			const message = JSON.parse(String(data))
-			console.log('message:', message)
+			logger.debug('message:', message)
 			if (message.message === 'connected') {
 				this.__backendWSId = message.session_id
-				console.log('internal sessionID:', this.__backendWSId)
+				logger.debug('internal sessionID:', this.__backendWSId)
 			}
 
 			this.frontendConnection.send(String(data))
@@ -72,18 +73,18 @@ export class WebSocketMiddleman {
 			if (!connection) throw new Error("Connection doesn't exist")
 			clearTimeout(this.pingTimeoutObject)
 			this.frontendConnection.close()
-			console.log(this.wsSessionId, 'closed')
-			console.log('Websocket connection closed')
+			logger.debug(this.wsSessionId, 'closed')
+			logger.debug('Websocket connection closed')
 		})
 
 		connection.on('error', (err) => {
-			console.log('error:', err)
+			logger.debug('error:', err)
 			connection.close()
 		})
 
 		connection.on('open', () => {
 			if (!connection) throw new Error("Connection doesn't exist")
-			console.log('Websocket connection opened')
+			logger.debug('Websocket connection opened')
 		})
 
 		this.backendConnection = connection
@@ -95,7 +96,7 @@ export class WebSocketMiddleman {
 			this.frontendConnection.terminate()
 		}
 		clearTimeout(this.pingTimeoutObject)
-		console.log(`Closed Backend WS connection ${this.wsSessionId}`)
+		logger.debug(`Closed Backend WS connection ${this.wsSessionId}`)
 	}
 }
 

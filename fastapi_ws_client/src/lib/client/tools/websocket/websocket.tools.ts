@@ -22,11 +22,10 @@ export function createWebSocketConnection(
 	protocol: string | string[] | undefined = undefined
 ): WebSocket | null {
 	const connection = browser ? new WebSocket(url, protocol) : null
-
+	console.log('URL:', url)
 	if (connection) {
 		connection.addEventListener('open', () => {
 			clearInterval(reconnectionManager)
-			console.log('Connecting to the tools')
 			storeConnected.set(true)
 		})
 
@@ -51,7 +50,7 @@ export function createWebSocketConnection(
 			storeWsConnection.set(null)
 			if (event.code !== 4000) {
 				reconnectionManager = setInterval(() => {
-					storeWsConnection.set(createWebSocketConnection(url))
+					storeWsConnection.set(createWebSocketConnection(url, wstimeout, protocol))
 				}, wstimeout + 1000)
 			}
 		})
@@ -67,5 +66,4 @@ export function handleMessage(
 		return [message, ...messages]
 	})
 	if (callback) callback(message)
-	console.log(message)
 }

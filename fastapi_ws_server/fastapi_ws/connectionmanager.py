@@ -41,8 +41,8 @@ class ConnectionManager:
     async def send_message(self, session_id, message):
         websocket: WebSocket = self.connections[session_id]
         if (
-            websocket is not None
-            and websocket.client_state != WebSocketState.DISCONNECTED
+                websocket is not None
+                and websocket.client_state != WebSocketState.DISCONNECTED
         ):
             logging.getLogger(__name__).info(
                 f"sending message to {session_id} : {message}"
@@ -52,5 +52,6 @@ class ConnectionManager:
             logging.getLogger(__name__).error(
                 f"cannot send message to {session_id} : {message}"
             )
+
 
 ws_conn_manager = ConnectionManager()

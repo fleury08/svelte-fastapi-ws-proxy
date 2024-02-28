@@ -13,7 +13,7 @@ export class ApiProxyTool {
 	}
 
 	async handle(path?: string, options?: RequestInit) {
-		if (!path) return new Error('No path provided')
+		if (!path) path = '/'
 		return fetch(`${this.apiBaseUrl}${path}`, options ?? this.options)
 	}
 }

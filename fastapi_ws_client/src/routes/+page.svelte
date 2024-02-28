@@ -3,7 +3,6 @@
 	import { closeWebSocketConnection, createWebSocketConnection } from '$lib/client/tools/websocket/websocket.tools'
 	import { Activity, ActivityItem, type ActivityType, P, Toolbar, ToolbarButton } from 'flowbite-svelte'
 	import Disconnect from '~icons/mdi/lan-disconnect'
-	import { websocket } from '@ubermanu/sveltekit-websocket/stores'
 	import Connect from '~icons/mdi/lan-connect'
 	import Random from '~icons/mdi/shuffle'
 	import Broadcast from '~icons/mdi/broadcast'
@@ -21,26 +20,32 @@
 	let apiActivities: ActivityType[] = []
 
 	onMount(async () => {
-		apiProxyTool = new ApiProxyTool(data.api_proxy,{
-			credentials: "same-origin",
-			mode: 'same-origin',
-			cache: 'no-cache'
+		const apiProxyURL = `${data.api_proxy.protocol}://${data.api_proxy.host}${data.api_proxy.path}`
+		apiProxyTool = new ApiProxyTool(apiProxyURL, {
+			mode: 'cors'
 		})
-		// wsEndpoints = await fetch(`${data.api_proxy}/endpoints`).then(res => res.json()) || []
+		wsConnect()
 	})
 
-	function disconnect() {
+	function wsDisconnect() {
 		if ($storeWsConnection) closeWebSocketConnection()
 	}
 
-	function connect() {
-		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection($websocket.url, data.ws_timeout))
+	function wsConnect() {
+		let wsURL = `${data.ws.protocol}://${data.ws.host}${data.ws.path}`
+		if($storeAuthToken)
+			wsURL = `${wsURL}?token=${$storeAuthToken.token}`
+
+		console.log("wsURL",wsURL)
+		if (!$storeWsConnection) storeWsConnection.set(createWebSocketConnection(wsURL, data.ws.timeout))
 	}
 
 	async function apiProxyAction(event: Event, callback?: CallableFunction) {
 		const target: HTMLElement = event?.currentTarget as HTMLElement
 		const action = target?.getAttribute('data-action') || undefined
-		const apiResponse = await apiProxyTool.handle(action).catch(e=>e).then(r=>r.json())
+		const method = target?.getAttribute('data-method') || "GET"
+		apiProxyTool.updateOptions({method: method, mode: 'cors'})
+		const apiResponse = await apiProxyTool.handle(action).catch(e=>console.log(e)).then(r=>r?.json())
 		if(callback) callback(apiResponse)
 		apiActivities = [{
 			title: action || 'No action',
@@ -52,11 +57,12 @@
 	}
 
   function setSecurityToken(securityToken: SecurityToken) {
+		console.log(securityToken)
 		if (!securityToken || !securityToken.token) return
-		//TODO: typecheck before update
+			//TODO: typecheck before update
 		storeAuthToken.set(securityToken)
 		apiProxyTool.updateOptions({headers: {Authorization: `Bearer ${securityToken.token}`}})
-		}
+	}
 
 	$: wsActivities = $storeWsMessages.map((msg): ActivityType => {
 		return {
@@ -83,11 +89,11 @@
 			<Random />
 			Get Random Token
 		</ToolbarButton>
-		<ToolbarButton class="flex gap-2" on:click={connect} variant="outline" color="red">
+		<ToolbarButton class="flex gap-2" on:click={wsConnect} variant="outline" color="red">
 			<Connect />
 			Connect
 		</ToolbarButton>
-		<ToolbarButton class="flex gap-2" on:click={disconnect} variant="outline" color="red">
+		<ToolbarButton class="flex gap-2" on:click={wsDisconnect} variant="outline" color="red">
 			<Disconnect />
 			Disconnect
 		</ToolbarButton>
